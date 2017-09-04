@@ -56,3 +56,11 @@ l = display_fft_phase(l)
 ##Undoo all changes and show original image
 l = undo_all(l)
 showimg(l)
+
+
+l = do_butterworth_sharpening(l,15,2)
+
+##Test 9:
+##use ns.jpg for this example
+##Apply butterworth sharpening filter
+l = do_butterworth_sharpening(l,15,2)

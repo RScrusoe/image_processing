@@ -1,3 +1,6 @@
+import numpy as np
+from PIL import Image
+from matplotlib import pyplot as plt
 
 def showimg(l):
     '''
@@ -23,7 +26,7 @@ def do_ifft(nparray):
     accepts the np array type object
     and return the inverse fourier transform of it
     '''
-    return abs(np.fft.ifft2(np.fft.ifftshift(nparray)))
+    return np.abs(np.fft.ifft2(np.fft.ifftshift(nparray)))
 
 
 def do_gamma(nparray, gamma):
@@ -113,7 +116,7 @@ def do_hist_equalize(l):
     and return the np array type object with histogram equalization done
     source for the algorith used here: https://en.wikipedia.org/wiki/Histogram_equalization
     '''
-    hists,bins = np.histogram(l.flat, np.arange(256), normed = False)
+    hist,bins = np.histogram(l.flat, np.arange(256), normed = False)
     cs = np.cumsum(hist)        #calculates cdf
     lflat = l.flat
     new_intensity = []
@@ -134,7 +137,6 @@ def do_hist_equalize(l):
 def do_padding(l, left, top, right, bottom):
     '''
     accepts the np array type object, left,top,right,bottom are the number of pixels to pad with zeros
-    and return the np array type object with log transform done
     returns np array type object wirh zeros padded
     '''
     left, top, right, bottom = int(left), int(top), int(right), int(bottom)
@@ -210,3 +212,50 @@ def display_fft_phase(l):
     l = l / maxi
     l = l * 255
     showimg(l)
+
+def butterworth_filter(u,v,centeru,centerv,d0,n):
+    '''
+    butterworth filter:
+    accepts u,v, centeru, centerv, d0,order (n)
+    and returns value of filter
+    '''
+
+    dist = np.sqrt((u-centeru)**2 + (v-centerv)**2)
+    if dist == 0:
+        return 1
+    else:
+        return 1/(1+ (d0/dist)**(2*n) )
+
+def remove_padding(l,left,top,right,bottom):
+    '''
+    accepts the np array type object, left,top,right,bottom are the number of pixels to remove padding
+    returns np array type object wirh padding
+    '''
+    left, top, right, bottom = int(left), int(top), int(right), int(bottom)
+    r, c = l.shape[0], l.shape[1]
+    newl = l[top:l.shape[0]-bottom,left:l.shape[1]-right]
+    return newl
+
+
+def do_butterworth_sharpening(l,d0,n):
+    '''
+    Butterworth sharpening filter
+    accpets np array type object, d0 and n 
+    returns new np array type object and shows butterworth sharperned image
+    '''
+    oldl = l
+    l = do_padding(l,l.shape[1]/2,l.shape[0]/2,l.shape[1]/2,l.shape[0]/2)
+    l = do_fft(l)
+    centeru,centerv = int(l.shape[0]/2), int(l.shape[1]/2)
+
+    for r in range(l.shape[0]):
+        for c in range(l.shape[1]):
+            l[r][c] = l[r][c] * butterworth_filter(r,c,centeru,centerv,d0,n)
+
+    l = do_ifft(l)
+    l = remove_padding(l,oldl.shape[1]/2,oldl.shape[0]/2,oldl.shape[1]/2,oldl.shape[0]/2)
+    l = l-np.min(l)
+    l = l/np.max(l)
+    l = l*255
+    showimg(l)
+    return l
