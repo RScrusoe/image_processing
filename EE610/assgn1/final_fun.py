@@ -83,6 +83,7 @@ def do_guassian_blur(l, size, sig=1):
     and return the np array type object with guassian blurring done
     '''
     kernel = guassian_kernel(size, sig)
+    l = do_padding(l,50,50,50,50)
     size = kernel.shape[0]
     cstart = np.int((size - 1) / 2)         # col starts here
     cstop = np.int(l.shape[1] - cstart)     # col stops here
@@ -95,7 +96,7 @@ def do_guassian_blur(l, size, sig=1):
             box = l[i - tmp:i + tmp + 1, j - tmp:j + tmp + 1]  # selecting box
             # multiplying box with kernel to update the original value
             l[i][j] = np.sum(box * kernel)
-
+    l = remove_padding(l,50,50,50,50)
     return l
 
 
@@ -178,8 +179,8 @@ def display_fft_magn(l):
     l = abs(l)
 
     # Remapping values n the range of 0-255 in order to diplay
-    maxi = np.max(l.ravel())
-    mini = np.min(l.ravel())
+    maxi = np.max(l)
+    mini = np.min(l)
     l = l - mini
     l = l / maxi
     l = l * 255

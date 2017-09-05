@@ -29,14 +29,14 @@ showimg(l)
 
 
 ##Test 4:
-##gamma correction
+##log transform
 l = do_log(l)
 showimg(l)
 
 
 ##Test 5:
 ##gaussian blur 
-l = do_gamma(l,0.5)
+l = do_guassian_blur(l,5)
 showimg(l)
 
 
@@ -57,8 +57,6 @@ l = display_fft_phase(l)
 l = undo_all(l)
 showimg(l)
 
-
-l = do_butterworth_sharpening(l,15,2)
 
 ##Test 9:
 ##use ns.jpg for this example
